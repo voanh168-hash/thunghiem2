@@ -1,0 +1,714 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Planner</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --soft: #f7f7f5;
+  --line: #e9e9e6;
+  --text: #37352f;
+  --muted: #85847e;
+  --accent: #587c69;
+  --accent-bg: #e8f1eb;
+  --red: #b84c4c;
+  --radius: 12px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid #7c9b89;
+  outline-offset: 2px;
+}
+button:disabled { opacity: .45; cursor: not-allowed; }
+.app { max-width: 1060px; margin: 0 auto; padding: 32px 28px 60px; }
+.topbar {
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 16px; flex-wrap: wrap;
+  padding-bottom: 22px; border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; gap: 11px; align-items: center; }
+.brand-icon {
+  width: 38px; height: 38px; display: grid; place-items: center;
+  background: var(--soft); border: 1px solid var(--line);
+  border-radius: 10px; font-size: 19px;
+}
+.brand-name { font-size: 15px; font-weight: 650; }
+.brand-sub { font-size: 12px; color: var(--muted); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--line); background: white; color: var(--text);
+  padding: 8px 12px; border-radius: 8px; font-weight: 500;
+}
+.btn:hover { background: var(--soft); }
+.btn.primary { background: var(--text); color: white; border-color: var(--text); }
+.btn.primary:hover { background: #55534b; }
+.btn.small { padding: 5px 9px; font-size: 12px; }
+.hero { padding: 34px 0 24px; }
+.eyebrow {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px;
+  color: var(--muted); font-weight: 650;
+}
+.project-title {
+  font-size: clamp(26px, 4vw, 35px); font-weight: 700;
+  letter-spacing: -1px; line-height: 1.25; margin: 8px 0;
+}
+.project-desc {
+  color: var(--muted); max-width: 650px; margin: 0;
+}
+.project-meta {
+  display: flex; align-items: center; gap: 10px 20px;
+  flex-wrap: wrap; margin-top: 17px; color: var(--muted); font-size: 12px;
+}
+.meta-item { display: flex; gap: 6px; align-items: center; }
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin: 6px 0 28px;
+}
+.stat {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 18px;
+}
+.stat-label { font-size: 12px; color: var(--muted); }
+.stat-value { font-size: 25px; font-weight: 650; margin-top: 3px; }
+.progress-track {
+  height: 5px; background: #eeeee9; border-radius: 20px;
+  overflow: hidden; margin-top: 9px;
+}
+.progress-fill {
+  height: 100%; background: var(--accent);
+  width: 0; transition: width .2s;
+}
+.section-heading {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin: 28px 0 13px; flex-wrap: wrap;
+}
+.section-heading h2 { font-size: 17px; margin: 0; font-weight: 650; }
+.section-heading p { color: var(--muted); font-size: 12px; margin: 3px 0 0; }
+.phase {
+  border: 1px solid var(--line); border-radius: var(--radius);
+  margin: 12px 0; overflow: hidden;
+}
+.phase-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 16px; background: #fcfcfb;
+}
+.phase-toggle {
+  border: 0; background: none; padding: 0; color: var(--muted);
+  font-size: 13px; width: 18px;
+}
+.phase-info { flex: 1; min-width: 0; }
+.phase-name { font-weight: 650; overflow-wrap: anywhere; }
+.phase-sub { color: var(--muted); font-size: 12px; }
+.phase-percent { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.phase-actions { display: flex; gap: 5px; }
+.icon-btn {
+  background: transparent; border: 1px solid transparent;
+  border-radius: 6px; padding: 4px 7px; color: var(--muted);
+}
+.icon-btn:hover { background: var(--soft); border-color: var(--line); }
+.task-list { padding: 0 16px; }
+.task {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 13px 0; border-top: 1px solid #f0f0ed;
+}
+.task-check {
+  appearance: none; width: 17px; height: 17px; flex: 0 0 17px;
+  border: 1.5px solid #c9c9c2; border-radius: 5px;
+  margin: 3px 0 0; cursor: pointer; position: relative;
+}
+.task-check:checked { background: var(--accent); border-color: var(--accent); }
+.task-check:checked::after {
+  content: "✓"; position: absolute; color: white;
+  font-size: 12px; left: 2px; top: -2px;
+}
+.task-main { flex: 1; min-width: 0; }
+.task-title { overflow-wrap: anywhere; }
+.task.done .task-title { text-decoration: line-through; color: #9a9a93; }
+.task-note { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.task-meta {
+  display: flex; align-items: center; gap: 7px;
+  flex-wrap: wrap; margin-top: 6px;
+}
+.tag {
+  display: inline-flex; align-items: center; border-radius: 5px;
+  padding: 2px 7px; font-size: 11px; background: var(--soft); color: #77766f;
+}
+.tag.high { background: #f9e9e6; color: #a54e41; }
+.tag.medium { background: #f7f0df; color: #93763c; }
+.tag.low { background: #e9f1ea; color: #53765d; }
+.tag.status { background: var(--accent-bg); color: var(--accent); }
+.task-actions { display: flex; gap: 2px; opacity: .75; }
+.task-actions button { font-size: 12px; }
+.add-task {
+  border: 0; background: transparent; color: var(--muted);
+  width: 100%; text-align: left; padding: 11px 16px;
+  border-top: 1px solid #f0f0ed;
+}
+.add-task:hover { background: var(--soft); color: var(--text); }
+.empty {
+  padding: 30px 18px; border: 1px dashed #dcdcd5;
+  border-radius: var(--radius); text-align: center; color: var(--muted);
+}
+.footer {
+  border-top: 1px solid var(--line); margin-top: 36px;
+  padding-top: 16px; display: flex; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 11px;
+}
+.save-status { color: var(--accent); }
+dialog {
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 0; width: min(480px, calc(100% - 28px));
+  color: var(--text); box-shadow: 0 18px 70px #0002;
+}
+dialog::backdrop { background: #24241f55; }
+.modal-head { padding: 19px 22px; border-bottom: 1px solid var(--line); }
+.modal-head h2 { font-size: 17px; margin: 0; }
+.modal-body { padding: 20px 22px; }
+.field { margin-bottom: 15px; }
+.field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.field input, .field textarea, .field select {
+  width: 100%; padding: 10px 11px; border: 1px solid #deded8;
+  border-radius: 7px; background: white; color: var(--text);
+}
+.field textarea { min-height: 78px; resize: vertical; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  border-top: 1px solid var(--line); padding: 14px 22px;
+}
+@media (max-width: 600px) {
+  .app { padding: 18px 14px 40px; }
+  .stats { gap: 7px; }
+  .stat { padding: 12px 10px; }
+  .stat-value { font-size: 21px; }
+  .phase-head { padding: 12px 10px; gap: 6px; }
+  .task-list { padding: 0 11px; }
+  .phase-actions .icon-btn { padding: 3px 4px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">▤</div>
+      <div>
+        <div class="brand-name">Project Planner</div>
+        <div class="brand-sub">Personal workspace</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="duplicateBtn">⧉ Nhân bản</button>
+      <button class="btn primary" id="newTaskBtn">+ Công việc</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">PROJECT WORKSPACE</div>
+    <h1 class="project-title" id="projectTitle"></h1>
+    <p class="project-desc" id="projectDesc"></p>
+    <div class="project-meta">
+      <span class="meta-item">◷ <span id="dateRange"></span></span>
+      <span class="meta-item">▦ <span id="taskSummary"></span></span>
+      <button class="btn small" id="editProjectBtn">Sửa thông tin dự án</button>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">Tiến độ tổng thể</div>
+      <div class="stat-value" id="overallPercent">0%</div>
+      <div class="progress-track"><div class="progress-fill" id="overallBar"></div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Đã hoàn thành</div>
+      <div class="stat-value" id="completedCount">0</div>
+      <div class="stat-label">công việc hoàn tất</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Còn lại</div>
+      <div class="stat-value" id="remainingCount">0</div>
+      <div class="stat-label">công việc cần xử lý</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-heading">
+      <div>
+        <h2>Các giai đoạn</h2>
+        <p>Chia dự án thành từng chặng nhỏ để dễ theo dõi.</p>
+      </div>
+      <button class="btn" id="addPhaseBtn">+ Thêm giai đoạn</button>
+    </div>
+    <div id="phases"></div>
+  </section>
+
+  <footer class="footer">
+    <span>Project Planner · Your plans, your pace.</span>
+    <span class="save-status" id="saveStatus">● Đã lưu trên thiết bị</span>
+  </footer>
+</div>
+
+<dialog id="taskDialog">
+  <form id="taskForm">
+    <div class="modal-head"><h2 id="taskDialogTitle">Thêm công việc</h2></div>
+    <div class="modal-body">
+      <input type="hidden" id="taskId">
+      <div class="field">
+        <label for="taskName">Tên công việc *</label>
+        <input id="taskName" required maxlength="180" placeholder="Ví dụ: Hoàn thiện đề cương">
+      </div>
+      <div class="field">
+        <label for="taskPhase">Giai đoạn</label>
+        <select id="taskPhase"></select>
+      </div>
+      <div class="field">
+        <label for="taskNote">Mô tả / ghi chú</label>
+        <textarea id="taskNote" maxlength="1200" placeholder="Các việc cần thực hiện, tài liệu liên quan..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="taskDue">Hạn hoàn thành</label>
+          <input id="taskDue" type="date">
+        </div>
+        <div class="field">
+          <label for="taskPriority">Mức ưu tiên</label>
+          <select id="taskPriority">
+            <option value="high">Cao</option>
+            <option value="medium" selected>Trung bình</option>
+            <option value="low">Thấp</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="cancelTaskBtn">Hủy</button>
+      <button type="submit" class="btn primary">Lưu công việc</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="projectDialog">
+  <form id="projectForm">
+    <div class="modal-head"><h2>Thông tin dự án</h2></div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="projectNameInput">Tên dự án *</label>
+        <input id="projectNameInput" required maxlength="140">
+      </div>
+      <div class="field">
+        <label for="projectDescInput">Mô tả</label>
+        <textarea id="projectDescInput" maxlength="600"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label for="projectStart">Ngày bắt đầu</label>
+          <input id="projectStart" type="date">
+        </div>
+        <div class="field">
+          <label for="projectEnd">Ngày kết thúc</label>
+          <input id="projectEnd" type="date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="cancelProjectBtn">Hủy</button>
+      <button type="submit" class="btn primary">Lưu dự án</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const STORAGE_KEY = "project-planner-v1";
+const $ = id => document.getElementById(id);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const today = () => new Date().toISOString().slice(0, 10);
+
+function makeStarter() {
+  return {
+    id: uid(),
+    title: "Kế hoạch dự án của tôi",
+    description: "Mô tả mục tiêu, phạm vi và kết quả mong đợi của dự án tại đây.",
+    start: today(),
+    end: "",
+    phases: [
+      {
+        id: uid(), name: "01 · Lên kế hoạch",
+        collapsed: false,
+        tasks: [
+          { id: uid(), name: "Xác định mục tiêu dự án", note: "Viết rõ kết quả cần đạt được.", due: "", priority: "high", done: true },
+          { id: uid(), name: "Xác định phạm vi công việc", note: "", due: "", priority: "medium", done: false },
+          { id: uid(), name: "Lập lịch trình thực hiện", note: "", due: "", priority: "medium", done: false }
+        ]
+      },
+      {
+        id: uid(), name: "02 · Triển khai",
+        collapsed: false,
+        tasks: [
+          { id: uid(), name: "Thực hiện các đầu việc chính", note: "", due: "", priority: "high", done: false },
+          { id: uid(), name: "Theo dõi tiến độ", note: "Cập nhật trạng thái định kỳ.", due: "", priority: "medium", done: false }
+        ]
+      },
+      {
+        id: uid(), name: "03 · Hoàn thiện",
+        collapsed: false,
+        tasks: [
+          { id: uid(), name: "Kiểm tra kết quả", note: "", due: "", priority: "medium", done: false },
+          { id: uid(), name: "Tổng kết và lưu tài liệu", note: "", due: "", priority: "low", done: false }
+        ]
+      }
+    ]
+  };
+}
+
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.projects) && data.projects.length) return data;
+    }
+  } catch (e) {
+    console.warn("Không đọc được dữ liệu đã lưu.", e);
+  }
+  return { activeId: null, projects: [makeStarter()] };
+}
+
+let store = loadProjects();
+if (!store.projects.some(p => p.id === store.activeId)) {
+  store.activeId = store.projects[0].id;
+}
+let editingTaskId = null;
+
+function current() {
+  return store.projects.find(p => p.id === store.activeId);
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    $("saveStatus").textContent = "● Đã lưu trên thiết bị";
+  } catch (e) {
+    $("saveStatus").textContent = "Không thể lưu — bộ nhớ trình duyệt có thể đã đầy";
+  }
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const parts = value.split("-");
+  return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : value;
+}
+
+function allTasks(project) {
+  return project.phases.flatMap(phase =>
+    phase.tasks.map(task => ({ ...task, phaseId: phase.id }))
+  );
+}
+
+function render() {
+  const project = current();
+  if (!project) return;
+
+  const tasks = allTasks(project);
+  const completed = tasks.filter(t => t.done).length;
+  const percent = tasks.length ? Math.round(completed / tasks.length * 100) : 0;
+
+  $("projectTitle").textContent = project.title;
+  $("projectDesc").textContent = project.description || "Chưa có mô tả cho dự án.";
+  $("dateRange").textContent = project.start || project.end
+    ? `${formatDate(project.start) || "Chưa đặt ngày"} → ${formatDate(project.end) || "Chưa đặt ngày"}`
+    : "Chưa đặt thời gian";
+  $("taskSummary").textContent = `${tasks.length} công việc · ${project.phases.length} giai đoạn`;
+  $("overallPercent").textContent = percent + "%";
+  $("overallBar").style.width = percent + "%";
+  $("completedCount").textContent = completed;
+  $("remainingCount").textContent = tasks.length - completed;
+
+  const host = $("phases");
+  host.innerHTML = "";
+
+  if (!project.phases.length) {
+    host.innerHTML = '<div class="empty">Chưa có giai đoạn nào.<br>Nhấn “Thêm giai đoạn” để bắt đầu.</div>';
+    return;
+  }
+
+  project.phases.forEach(phase => {
+    const total = phase.tasks.length;
+    const done = phase.tasks.filter(t => t.done).length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const section = document.createElement("section");
+    section.className = "phase";
+
+    const head = document.createElement("div");
+    head.className = "phase-head";
+    head.innerHTML = `
+      <button class="phase-toggle" data-action="toggle" title="Thu gọn hoặc mở rộng">${phase.collapsed ? "▸" : "▾"}</button>
+      <div class="phase-info">
+        <div class="phase-name">${escapeHTML(phase.name)}</div>
+        <div class="phase-sub">${done}/${total} công việc hoàn thành</div>
+      </div>
+      <div class="phase-percent">${pct}%</div>
+      <div class="phase-actions">
+        <button class="icon-btn" data-action="add" title="Thêm công việc">＋</button>
+        <button class="icon-btn" data-action="rename" title="Đổi tên giai đoạn">✎</button>
+        <button class="icon-btn" data-action="delete-phase" title="Xóa giai đoạn">×</button>
+      </div>`;
+    section.appendChild(head);
+
+    head.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.action;
+        if (action === "toggle") {
+          phase.collapsed = !phase.collapsed;
+          save(); render();
+        }
+        if (action === "add") openTaskDialog(phase.id);
+        if (action === "rename") renamePhase(phase.id);
+        if (action === "delete-phase") deletePhase(phase.id);
+      });
+    });
+
+    if (!phase.collapsed) {
+      const list = document.createElement("div");
+      list.className = "task-list";
+
+      if (!total) {
+        list.innerHTML = '<div style="padding:12px 0;color:var(--muted);font-size:12px">Chưa có công việc trong giai đoạn này.</div>';
+      }
+
+      phase.tasks.forEach(task => {
+        const row = document.createElement("div");
+        row.className = "task" + (task.done ? " done" : "");
+        const priorityLabel = { high: "Cao", medium: "Trung bình", low: "Thấp" }[task.priority] || "Trung bình";
+        const dueTag = task.due
+          ? `<span class="tag">◷ ${escapeHTML(formatDate(task.due))}</span>` : "";
+        row.innerHTML = `
+          <input class="task-check" type="checkbox" aria-label="Đánh dấu hoàn thành" ${task.done ? "checked" : ""}>
+          <div class="task-main">
+            <div class="task-title">${escapeHTML(task.name)}</div>
+            ${task.note ? `<div class="task-note">${escapeHTML(task.note)}</div>` : ""}
+            <div class="task-meta">
+              <span class="tag ${escapeHTML(task.priority)}">${priorityLabel}</span>
+              ${dueTag}
+              ${task.done ? '<span class="tag status">Hoàn thành</span>' : ""}
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="icon-btn" data-action="edit" title="Sửa">✎</button>
+            <button class="icon-btn" data-action="delete" title="Xóa">×</button>
+          </div>`;
+
+        row.querySelector(".task-check").addEventListener("change", e => {
+          task.done = e.target.checked;
+          save(); render();
+        });
+        row.querySelector('[data-action="edit"]').addEventListener("click", () => openTaskDialog(phase.id, task.id));
+        row.querySelector('[data-action="delete"]').addEventListener("click", () => deleteTask(phase.id, task.id));
+        list.appendChild(row);
+      });
+
+      section.appendChild(list);
+      const add = document.createElement("button");
+      add.className = "add-task";
+      add.textContent = "+ Thêm công việc";
+      add.addEventListener("click", () => openTaskDialog(phase.id));
+      section.appendChild(add);
+    }
+    host.appendChild(section);
+  });
+}
+
+function openTaskDialog(phaseId, taskId = null) {
+  const project = current();
+  if (!project.phases.length) {
+    alert("Hãy tạo ít nhất một giai đoạn trước khi thêm công việc.");
+    return;
+  }
+  editingTaskId = taskId;
+  $("taskForm").reset();
+  $("taskId").value = taskId || "";
+
+  $("taskPhase").innerHTML = project.phases.map(p =>
+    `<option value="${escapeHTML(p.id)}">${escapeHTML(p.name)}</option>`
+  ).join("");
+  $("taskPhase").value = phaseId || project.phases[0].id;
+
+  if (taskId) {
+    const phase = project.phases.find(p => p.tasks.some(t => t.id === taskId));
+    const task = phase?.tasks.find(t => t.id === taskId);
+    if (!task || !phase) return;
+    $("taskDialogTitle").textContent = "Chỉnh sửa công việc";
+    $("taskName").value = task.name;
+    $("taskNote").value = task.note || "";
+    $("taskDue").value = task.due || "";
+    $("taskPriority").value = task.priority || "medium";
+    $("taskPhase").value = phase.id;
+  } else {
+    $("taskDialogTitle").textContent = "Thêm công việc";
+    $("taskPriority").value = "medium";
+  }
+  $("taskDialog").showModal();
+  $("taskName").focus();
+}
+
+$("taskForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const project = current();
+  const name = $("taskName").value.trim();
+  if (!name) return;
+
+  const target = project.phases.find(p => p.id === $("taskPhase").value);
+  if (!target) return;
+
+  const task = {
+    id: editingTaskId || uid(),
+    name,
+    note: $("taskNote").value.trim(),
+    due: $("taskDue").value,
+    priority: $("taskPriority").value,
+    done: false
+  };
+
+  if (editingTaskId) {
+    for (const phase of project.phases) {
+      const index = phase.tasks.findIndex(t => t.id === editingTaskId);
+      if (index !== -1) {
+        task.done = phase.tasks[index].done;
+        phase.tasks.splice(index, 1);
+        break;
+      }
+    }
+  }
+  target.tasks.push(task);
+  $("taskDialog").close();
+  save(); render();
+});
+
+$("cancelTaskBtn").addEventListener("click", () => $("taskDialog").close());
+
+function deleteTask(phaseId, taskId) {
+  if (!confirm("Bạn có chắc muốn xóa công việc này?")) return;
+  const phase = current().phases.find(p => p.id === phaseId);
+  phase.tasks = phase.tasks.filter(t => t.id !== taskId);
+  save(); render();
+}
+
+function renamePhase(phaseId) {
+  const phase = current().phases.find(p => p.id === phaseId);
+  const name = prompt("Tên giai đoạn mới:", phase.name);
+  if (name === null) return;
+  if (!name.trim()) {
+    alert("Tên giai đoạn không được để trống.");
+    return;
+  }
+  phase.name = name.trim();
+  save(); render();
+}
+
+function deletePhase(phaseId) {
+  const phase = current().phases.find(p => p.id === phaseId);
+  if (!confirm(`Xóa giai đoạn "${phase.name}" và toàn bộ công việc bên trong?`)) return;
+  current().phases = current().phases.filter(p => p.id !== phaseId);
+  save(); render();
+}
+
+$("addPhaseBtn").addEventListener("click", () => {
+  const name = prompt("Tên giai đoạn mới:");
+  if (name === null) return;
+  if (!name.trim()) {
+    alert("Tên giai đoạn không được để trống.");
+    return;
+  }
+  current().phases.push({ id: uid(), name: name.trim(), collapsed: false, tasks: [] });
+  save(); render();
+});
+
+$("newTaskBtn").addEventListener("click", () => {
+  const project = current();
+  if (!project.phases.length) {
+    alert("Hãy tạo giai đoạn trước khi thêm công việc.");
+    return;
+  }
+  openTaskDialog(project.phases[0].id);
+});
+
+$("editProjectBtn").addEventListener("click", () => {
+  const project = current();
+  $("projectNameInput").value = project.title;
+  $("projectDescInput").value = project.description || "";
+  $("projectStart").value = project.start || "";
+  $("projectEnd").value = project.end || "";
+  $("projectDialog").showModal();
+});
+
+$("cancelProjectBtn").addEventListener("click", () => $("projectDialog").close());
+
+$("projectForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const title = $("projectNameInput").value.trim();
+  if (!title) return;
+  current().title = title;
+  current().description = $("projectDescInput").value.trim();
+  current().start = $("projectStart").value;
+  current().end = $("projectEnd").value;
+  $("projectDialog").close();
+  save(); render();
+});
+
+$("duplicateBtn").addEventListener("click", () => {
+  const original = current();
+  const name = prompt("Tên cho bản kế hoạch mới:", original.title + " (Bản sao)");
+  if (name === null) return;
+  if (!name.trim()) {
+    alert("Tên kế hoạch không được để trống.");
+    return;
+  }
+
+  const copy = JSON.parse(JSON.stringify(original));
+  copy.id = uid();
+  copy.title = name.trim();
+  copy.start = today();
+  copy.end = "";
+  copy.phases = copy.phases.map(phase => ({
+    ...phase,
+    id: uid(),
+    collapsed: false,
+    tasks: phase.tasks.map(task => ({
+      ...task, id: uid(), done: false
+    }))
+  }));
+
+  store.projects.push(copy);
+  store.activeId = copy.id;
+  save(); render();
+  alert("Đã tạo bản sao! Trạng thái công việc đã được đặt lại.");
+});
+
+save();
+render();
+</script>
+</body>
+</html>
